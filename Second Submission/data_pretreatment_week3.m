@@ -102,11 +102,14 @@ test_data4(isnan(test_data4)) = 0;
 [Loading2, Scores2, EigenVals2, T2_2, Explained2, mu2] = pca(calibration_data2);
 [Loading3, Scores3, EigenVals3, T2_3, Explained3, mu3] = pca(calibration_data3);
 [Loading4, Scores4, EigenVals4, T2_4, Explained4, mu4] = pca(calibration_data4);
+
 %% Visualize and comment the variation explained by the model with different no. PCs
 figure;
 
 plot(1:length(Explained1),cumsum(Explained1))
+
 hold on
+
 plot(1:length(Explained2),cumsum(Explained2))
 
 plot(1:length(Explained3),cumsum(Explained3))
@@ -120,10 +123,11 @@ legend('calibration_data1','calibration_data2','calibration_data3','calibration_
 hold off;
 % From the plot, we will keep 8 principal components for dataset 1 because it explains
 % most of variance at 91.2%.
-% 4 principal components for dataset 2 and 4 because it explains most of variance at 99.42%.
+% 2 principal components for dataset 2 and 4 because it explains most of variance at 99.42%.
 % 6 principal components for dataset 3 because it explains most of variance at 90.5%.
 
-%% Compute the biplot of the principal components
+%% Visualize the biplot of the principal components
+
 % For dataset 1 : 8 components
 ii = 1;
 vbls = {'Sensor measurement1','Sensor measurement2','Sensor measurement3','Sensor measurement4','Sensor measurement5','Sensor measurement6','Sensor measurement7','Sensor measurement8','Sensor measurement9','Sensor measurement10','Sensor measurement11','Sensor measurement12','Sensor measurement13','Sensor measurement14','Sensor measurement15','Sensor measurement16','Sensor measurement17','Sensor measurement18','Sensor measurement19','Sensor measurement20','Sensor measurement21','RUL'};
@@ -139,7 +143,6 @@ for i = 1:7
     ii = ii + 1;
 end
 
-
 % For dataset 2 : 4 components
 ii = 1;
 figure;
@@ -154,7 +157,6 @@ for i = 1:3
     ii = ii + 1;
 end
 
-
 % For dataset 3 : 6 components
 ii = 1;
 figure;
@@ -168,7 +170,6 @@ for i = 1:5
     title('6 components for Dataset3')
     ii = ii + 1;
 end
-
 
 % For dataset 4 : 4 components
 ii = 1;
@@ -203,43 +204,40 @@ model(4).X = calibration_data4;
 model(4).P = Loading4;
 model(4).latent = EigenVals4;
 
-% Number of PCs to consider (assuming 15 as mentioned)
+% Store number of principle components for each datasets
 nPCs = [8 4 6 4];
 
-for k = 1:4  % Loop through each dataset
+for k = 1:4 
     contrT2 = t2contr(model(k).X, model(k).P, model(k).latent, nPCs(k));
     contrQ  = qcontr(model(k).X, model(k).P, nPCs(k));
-
-    % Plotting T2 contribution
+    % Plot T^2
     figure;
     bar(contrT2);
     title("Variable Contributions to T2 for Dataset " + k);
-
-    % Plotting SPEx contribution
+    % Plot SPEx
     figure;
     bar(contrQ);
     title("Variable Contributions to SPEx for Dataset " + k);
 end
 
-%% 
-alpha = 0.05; % significance level for control limits
+%% Setting Control Limit
+% We decided to set the significance level of control limits is 0.05
+% because it's commonly used.
+alpha = 0.05; 
 
-% Function to compute T2 statistic for given data, loadings, and latent values
+% Function to calculate T2 statistic for given data, loadings, and latent values
 computeT2 = @(X,P,latent,nPCs) sum((X * P(:,1:nPCs)).^2 ./ latent(1:nPCs)', 2);
 
-% Function to compute SPE statistic
+% Function to calculate SPE
 computeSPE = @(X,P,nPCs) sum((X - X * P(:,1:nPCs) * P(:,1:nPCs)').^2, 2);
 
-for k = 1:4  % Loop through each dataset
-    % Compute T2 and SPE for calibration data
+for k = 1:4 
     T2_cal = computeT2(model(k).X, model(k).P, model(k).latent, nPCs(k));
     SPE_cal = computeSPE(model(k).X, model(k).P, nPCs(k));
-    
-    % Set control limits
     T2_limit = quantile(T2_cal, 1-alpha);
     SPE_limit = quantile(SPE_cal, 1-alpha);
     
-    % Compute T2 and SPE for test data
+    % Calculate T2 and SPE for test data
     if k == 1
         test_data = test_data1;
     elseif k == 2
@@ -274,7 +272,8 @@ for k = 1:4  % Loop through each dataset
     hold off;
 end
 
-% To determine the RUL when the test data goes out of control, simply find the first instance where the T2 or SPE exceeds the limit.
+% Find the first occurrence where the T2 or SPE exceeds the limit to determine 
+% the RUL when the test data goes out of control
 for k = 1:4
     if k == 1
         RUL_values = dataset1(:, end);
@@ -297,13 +296,10 @@ end
 %% Function part
 function [calibration_data, validation_data, test_data] = split_data(data, calibration_ratio, validation_ratio)
     total_rows = size(data, 1);
-
-    % Determine the number of rows for each split based on the provided ratios
     calibration_rows = floor(total_rows * calibration_ratio);
     validation_rows = floor(total_rows * validation_ratio);
     test_rows = total_rows - calibration_rows - validation_rows;
 
-    % Split the dataset
     calibration_data = data(1:calibration_rows, :);
     validation_data = data(calibration_rows+1:calibration_rows+validation_rows, :);
     test_data = data(calibration_rows+validation_rows+1:end, :);
