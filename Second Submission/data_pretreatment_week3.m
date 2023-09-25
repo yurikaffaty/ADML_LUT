@@ -118,8 +118,10 @@ xlabel('No. PCs in the model')
 ylabel('Explained variance of the model (%)')
 legend('calibration_data1','calibration_data2','calibration_data3','calibration_data4')
 hold off;
-% From the plot, we will keep 15 principal components because it explains
-% most of variance at 99%.
+% From the plot, we will keep 8 principal components for dataset 1 because it explains
+% most of variance at 91.2%.
+% 2 principal components for dataset 2 and 4 because it explains most of variance at 99.42%.
+% 6 principal components for dataset 3 because it explains most of variance at 90.5%.
 
 %% Compute the biplot of the principal components
 % For dataset 1 : 8 components
