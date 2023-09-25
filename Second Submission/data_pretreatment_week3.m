@@ -120,7 +120,7 @@ legend('calibration_data1','calibration_data2','calibration_data3','calibration_
 hold off;
 % From the plot, we will keep 8 principal components for dataset 1 because it explains
 % most of variance at 91.2%.
-% 2 principal components for dataset 2 and 4 because it explains most of variance at 99.42%.
+% 4 principal components for dataset 2 and 4 because it explains most of variance at 99.42%.
 % 6 principal components for dataset 3 because it explains most of variance at 90.5%.
 
 %% Compute the biplot of the principal components
