@@ -59,12 +59,17 @@ dataset3 = [dataset3, RUL_dataset3];
 dataset4 = dataset4(:, 6:end);
 dataset4 = [dataset4, RUL_dataset4];
 
+%%Sort
+dataset1 = sortrows(dataset1, 2);
+dataset2 = sortrows(dataset2, 2);
+dataset3 = sortrows(dataset3, 2);
+dataset4 = sortrows(dataset4, 2);
 
 %% Division of data into calibration (training), validation and test partitions
-% We split the data into calibration for 30%, validation and test data for
-% 35% per each. 
-calibration_split = 0.3;
-validation_split = 0.35;
+% We split the data into calibration for 80%, validation and test data for
+% 10% per each. 
+calibration_split = 0.8;
+validation_split = 0.1;
 
 [calibration_data1, validation_data1, test_data1] = split_data(dataset1, calibration_split, validation_split);
 [calibration_data2, validation_data2, test_data2] = split_data(dataset2, calibration_split, validation_split);
